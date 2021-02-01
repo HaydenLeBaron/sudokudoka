@@ -1,4 +1,4 @@
-;; 4x4 sudoku solver
+;; Sudoku solver
 
 
 ;; EXAMPLE OF THE STRUCTURE OF A CSP
@@ -49,15 +49,13 @@
    ))
 
 
-
-(define cells (range 16))
-(define dim (sqrt (length cells)))
-(define vals (range 1 (+ dim 1)))
-
 (define (all-unique? a b c d)
   (= (length (list a b c d)) (length (set->list(list->set (list a b c d))))))
 
 
+(define cells (range 16))
+(define dim (sqrt (length cells)))
+(define vals (range 1 (+ dim 1)))
 
 (define rows
   (for/list ([i dim])
@@ -82,33 +80,17 @@
 ;; TODO: define grid constraints and add to constraints list
 
 (define constraints
-  (append
-   row-uniqueness-constraints
-   col-uniqueness-constraints
-   (list (constraint cells board-spec))
-   ))
+  (append row-uniqueness-constraints
+          col-uniqueness-constraints
+          (list (constraint cells board-spec))))
+
+(define vars
+  (for/list ([i cells])
+    (var i vals)))
 
 
 ;; TODO: figure out the idiomatic way to express this concisely
-(define vars
-  (list (var 0 vals)
-        (var 1 vals)
-        (var 2 vals)
-        (var 3 vals)
-        (var 4 vals)
-        (var 5 vals)
-        (var 6 vals)
-        (var 7 vals)
-        (var 8 vals)
-        (var 9 vals)
-        (var 10 vals)
-        (var 11 vals)
-        (var 12 vals)
-        (var 13 vals)
-        (var 14 vals)
-        (var 15 vals)
-        )
-  )
+
 
 ;; =====================
 ;; UTILS
@@ -119,13 +101,16 @@
 ;  )
 
 
-;; =====================
-;; TESTS
-;; =====================
-
 
 (check-equal? (all-unique? 1 2 3 4) #t)
 (check-equal? (all-unique? 1 1 2 3) #f)
+
+
+;; =====================
+;; SOLVE
+;; =====================
+
+
 
 ;(current-inference forward-check) ;; Default is true
 
