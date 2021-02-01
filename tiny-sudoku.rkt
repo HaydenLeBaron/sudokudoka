@@ -28,7 +28,7 @@
 
 
 
-
+;; TODO: refactor to work for board of any size
 (define (board-spec a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15)
   (and
    (= a0 1)
@@ -93,13 +93,20 @@
 
 
 ;; =====================
-;; UTILS
+;; UTILITIES
 ;; =====================
 
-;(define (print-sudoku sudoku)
-;  ...sudoku...
-;  )
-
+(define (print-soln raw-soln)
+  (let ([soln
+         (for/list ([i (length raw-soln)])
+           (cdr (list-ref raw-soln i)))
+         ])
+    (for ([i dim])
+      (for ([j dim])
+        (printf "~a " (list-ref soln (+ (* i dim) j)))
+        )
+      (printf "\n")
+    )))
 
 
 (check-equal? (all-unique? 1 2 3 4) #t)
@@ -140,6 +147,6 @@
 ;(print constraints)
 
 
-(define soln (solve sudoku))
-(print soln)
+(define raw-soln (solve sudoku))
+(print-soln raw-soln)
 
