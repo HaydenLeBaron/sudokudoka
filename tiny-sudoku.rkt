@@ -31,8 +31,7 @@
   (= (length (list a b c d)) (length (set->list(list->set (list a b c d))))))
 
 ;(define (num-at-cellidx=arg? idx arg)
-;(= (list-ref cells idx) arg))
-
+  ;(= (list-ref cells idx) arg))
 
 
 ;; TODO: figure out the idiomatic way to express this concisely
