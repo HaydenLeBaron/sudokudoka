@@ -29,26 +29,54 @@
 
 
 ;; TODO: refactor to work for board of any size
-(define (board-spec a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15)
-  (and
-   (= a0 1)
-   ;(= a2 x)
-   ;(= a3 x)
-   ;(= a4 x)
-   ;(= a5 x)
-   ;(= a6 x)
-   (= a7 4)
-   ;(= a8 x)
-   ;(= a9 x)
-   (= a10 2)
-   ;(= a11 x)
-   ;(= a12 x)
-   (= a13 3)
-   ;(= a14 x)
-   ;(= a15 x)
-   ))
+;; (define (board-spec a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15)
+;;   (and
+;;    (= a0 1)
+;;    ;(= a2 x)
+;;    ;(= a3 x)
+;;    ;(= a4 x)
+;;    ;(= a5 x)
+;;    ;(= a6 x)
+;;    (= a7 4)
+;;    ;(= a8 x)
+;;    ;(= a9 x)
+;;    (= a10 2)
+;;    ;(= a11 x)
+;;    ;(= a12 x)
+;;    (= a13 3)
+;;    ;(= a14 x)
+;;    ;(= a15 x)
+;;    ))
+
+;; BKMRK
+;; (define (val-atidx-constraints puzzle-start)
+;;   (for/list ([i (length cells)])
+;;     #:when (!= )
+;;     (constraint (list-ref cells i) (lambda (x) (= x 2)))))
 
 
+;(define nums '(0 1 0 2 0 3 0 4 0 5))
+;(for/list ([(num nidx) (in-indexed nums)]
+;      #:when (not (= num 0)))
+;  num)
+
+;; (define nums '(0 1 0 2 0 3 0 4))
+;; (define puzz '(1 1 2 2 4 3 6 4))
+
+
+;; (for/list ([(num nidx) (in-indexed nums)]
+;;            #:when (not (= num 0)))
+;;   (constraint
+;;    (= (list-ref puzz nidx) num)))
+
+
+;; (constraint (list-ref rows i) all-unique?)
+
+
+
+
+
+;; TODO: refactor to work for board of any size
 (define (all-unique? a b c d)
   (= (length (list a b c d)) (length (set->list(list->set (list a b c d))))))
 
@@ -79,10 +107,28 @@
 
 ;; TODO: define grid constraints and add to constraints list
 
+;; BKMRK
+
+
+;; PUT THE SPEC FOR A PUZZLE IN HERE. CELL LEVEL CONSTRAINTS GO HERE.
+(define puzzle
+  '(1 0 0 0 0 0 0 4 0 0 2 0 0 3 0 0)
+  )
+
+(define cell-constraints
+  (for/list ([i cells]
+             #:when (not (= (list-ref puzzle i) 0)))
+    (constraint (list (list-ref cells i))
+                (λ (x)
+                  (= x (list-ref puzzle i))
+                  ))))
+
 (define constraints
   (append row-uniqueness-constraints
           col-uniqueness-constraints
-          (list (constraint cells board-spec))))
+          cell-constraints
+          ))
+
 
 (define vars
   (for/list ([i cells])
