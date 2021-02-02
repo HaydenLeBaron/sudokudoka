@@ -28,62 +28,27 @@
 
 
 
-;; TODO: refactor to work for board of any size
-;; (define (board-spec a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15)
-;;   (and
-;;    (= a0 1)
-;;    ;(= a2 x)
-;;    ;(= a3 x)
-;;    ;(= a4 x)
-;;    ;(= a5 x)
-;;    ;(= a6 x)
-;;    (= a7 4)
-;;    ;(= a8 x)
-;;    ;(= a9 x)
-;;    (= a10 2)
-;;    ;(= a11 x)
-;;    ;(= a12 x)
-;;    (= a13 3)
-;;    ;(= a14 x)
-;;    ;(= a15 x)
-;;    ))
-
-;; BKMRK
-;; (define (val-atidx-constraints puzzle-start)
-;;   (for/list ([i (length cells)])
-;;     #:when (!= )
-;;     (constraint (list-ref cells i) (lambda (x) (= x 2)))))
-
-
-;(define nums '(0 1 0 2 0 3 0 4 0 5))
-;(for/list ([(num nidx) (in-indexed nums)]
-;      #:when (not (= num 0)))
-;  num)
-
-;; (define nums '(0 1 0 2 0 3 0 4))
-;; (define puzz '(1 1 2 2 4 3 6 4))
-
-
-;; (for/list ([(num nidx) (in-indexed nums)]
-;;            #:when (not (= num 0)))
-;;   (constraint
-;;    (= (list-ref puzz nidx) num)))
-
-
-;; (constraint (list-ref rows i) all-unique?)
 
 
 
-
-
-;; TODO: refactor to work for board of any size
-(define (all-unique? a b c d)
-  (= (length (list a b c d)) (length (set->list(list->set (list a b c d))))))
+(define (all-unique? . xs)
+  (= (length xs) (length (set->list(list->set xs)))))
 
 
 (define cells (range 16))
 (define dim (sqrt (length cells)))
 (define vals (range 1 (+ dim 1)))
+
+
+;; PUT THE SPEC FOR A PUZZLE IN HERE. CELL LEVEL CONSTRAINTS GO HERE.
+
+;; blank cells are marked with 0s
+(define puzzle
+  (list 1 0 0 0
+        0 0 0 4
+        0 0 2 0
+        0 3 0 0)
+  )
 
 (define rows
   (for/list ([i dim])
@@ -93,7 +58,25 @@
   (for/list ([i dim])
     (filter (λ (cell) (= (remainder cell dim) i)) cells)))
 
-;; TODO: define grids
+(define (grids dim)
+  (case dim
+      [(4) (list '(0 1 4 5) '(2 3 6 7)
+                      '(8 9 12 13) '(10 11 14 15))]
+    [(9) (list '(0 1 2 9 10 11 18 19 20) '(3 4 5 12 13 14 21 22 23) '(6 7 8 15 16 17 24 25 26)
+           '(27 28 29 36 37 38 45 46 47) '(31 32 39 40 41 48 49 50) '(33 34 35 42 43 44 51 52 53)
+           '(54 55 56 63 64 65 72 73 74) '(57 58 59 66 67 68 75 76 77) '(60 61 62 69 70 71 78 79 80))]
+      [else (raise-argument-error 'grids "4 or 9" dim "Invalid dim to function grids")])
+  )
+
+
+
+(define cell-constraints
+  (for/list ([i cells]
+             #:when (not (= (list-ref puzzle i) 0)))  ; blank cells are 0
+    (constraint (list (list-ref cells i))
+                (λ (x)
+                  (= x (list-ref puzzle i))
+                  ))))
 
 (define row-uniqueness-constraints
   (for/list ([i dim])
@@ -105,27 +88,18 @@
     (constraint (list-ref cols i) all-unique?)
     ))
 
-;; TODO: define grid constraints and add to constraints list
-
-;; BKMRK
-
-
-;; PUT THE SPEC FOR A PUZZLE IN HERE. CELL LEVEL CONSTRAINTS GO HERE.
-(define puzzle
-  '(1 0 0 0 0 0 0 4 0 0 2 0 0 3 0 0)
+(define grids-uniqueness-constraints
+  (for/list ([i dim])
+    (constraint (list-ref (grids dim) i) all-unique?)
+    )
   )
 
-(define cell-constraints
-  (for/list ([i cells]
-             #:when (not (= (list-ref puzzle i) 0)))
-    (constraint (list (list-ref cells i))
-                (λ (x)
-                  (= x (list-ref puzzle i))
-                  ))))
+
 
 (define constraints
   (append row-uniqueness-constraints
           col-uniqueness-constraints
+          grids-uniqueness-constraints
           cell-constraints
           ))
 
@@ -134,8 +108,6 @@
   (for/list ([i cells])
     (var i vals)))
 
-
-;; TODO: figure out the idiomatic way to express this concisely
 
 
 ;; =====================
