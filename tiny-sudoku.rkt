@@ -1,24 +1,6 @@
 ;; Sudoku solver
 
 
-;; EXAMPLE OF THE STRUCTURE OF A CSP
-;; ---------------------------------
-;; ;; Define constraint-satisfaction problem
-;; (define triples
-;;   (let ([domain (range 1 30)])
-;;     (make-csp
-;;      (list (var 'a domain)
-;;            (var 'b domain)
-;;            (var 'c domain))
-;;      (list (constraint (list 'a 'b 'c) valid-triple?)
-;;            (constraint (list 'a 'b) <=)
-;;            (constraint (list 'a 'b 'c) coprime?)))))
-
-;; ;; Find all solutions
-;; (solve* triples)
-
-
-
 
 #lang racket
 (require csp)
@@ -30,10 +12,6 @@
 
 
 
-
-
-(define (all-unique? . xs)
-  (= (length xs) (length (set->list(list->set xs)))))
 
 
 
@@ -106,13 +84,6 @@
 ;;         5 4 2 6 1 3
 ;;         3 6 1 5 2 4
 ;;         ))
-
-
-
-
-
-
-
 
 
 ;; Wikipedia sudoku
@@ -206,75 +177,64 @@
         0 0 0  0 0 0  0 0 0))
 
 
-;; NOTE: TODO: CHOOSE PUZZLE HERE
-(define puzzle easy-9x9-puzzle)
-
-(define cells (range (length puzzle)))
-(define dim (sqrt (length puzzle)))
-(define vals (range 1 (+ dim 1)))
+(define (get-cells puzzle) (range (length puzzle)))
+(define (get-dim puzzle) (sqrt (length puzzle)))
+(define (get-vals dim) (range 1 (+ dim 1)))
 
 
 
-(define rows
-  (for/list ([i dim])
-    (filter (λ (cell) (= (quotient cell dim) i)) cells)))
+(define (get-rows cells)
+  (for/list ([i (get-dim cells)])
+    (filter (λ (cell) (= (quotient cell (get-dim cells))
+                         i))
+            cells)))
 
-(define cols
-  (for/list ([i dim])
-    (filter (λ (cell) (= (remainder cell dim) i)) cells)))
+(define (get-cols cells)
+  (for/list ([i (get-dim cells)])
+    (filter (λ (cell) (= (remainder cell (get-dim cells))
+                         i))
+            cells)))
 
-(define (grids dim)
-  (case dim
+
+(define (get-grids puzzle)
+  (case (get-dim puzzle)
       [(4) (list '(0 1 4 5) '(2 3 6 7)
                   '(8 9 12 13) '(10 11 14 15))]
     [(9) (list '(0 1 2 9 10 11 18 19 20) '(3 4 5 12 13 14 21 22 23) '(6 7 8 15 16 17 24 25 26)
            '(27 28 29 36 37 38 45 46 47) '(31 32 39 40 41 48 49 50) '(33 34 35 42 43 44 51 52 53)
            '(54 55 56 63 64 65 72 73 74) '(57 58 59 66 67 68 75 76 77) '(60 61 62 69 70 71 78 79 80))]
       ;[else (raise-argument-error 'grids "4 or 9" dim "Invalid dim to function grids")])
-    [else (list)]
-  ))
+    [else (list)]))
+
+(define (all-unique? . xs)
+  (= (length xs) (length (set->list(list->set xs)))))
 
 
-;; TODO: FIXME: these cell-level constraints aren't being made properly. Probably why it
-;; doesn't work right
-(define cell-constraints
-  (for/list ([i cells]
+(define (cell-constraints puzzle)
+  (for/list ([i (get-cells puzzle)]
              #:when (not (= (list-ref puzzle i) 0)))  ; blank cells are 0
-    (constraint (list (list-ref cells i))
+    (constraint (list (list-ref (get-cells puzzle) i))
                 (λ (x)
-                  (= x (list-ref puzzle i))
-                  ))))
+                  (= x (list-ref puzzle i))))))
 
-(define row-uniqueness-constraints
-  (for/list ([i dim])
-    (constraint (list-ref rows i) all-unique?)
-  ))
+(define (row-uniqueness-constraints puzzle)
+  (for/list ([i (get-dim puzzle)])
+    (constraint (list-ref (get-rows (get-cells puzzle)) i)
+                all-unique?)))
 
-(define col-uniqueness-constraints
-  (for/list ([i dim])
-    (constraint (list-ref cols i) all-unique?)
-    ))
+(define (col-uniqueness-constraints puzzle)
+  (for/list ([i (get-dim puzzle)])
+    (constraint (list-ref (get-cols (get-cells puzzle)) i)
+                all-unique?)))
 
-(define grids-uniqueness-constraints
-  (if (empty? (grids dim))
+(define (grids-uniqueness-constraints puzzle)
+  (if (empty? (get-grids puzzle))
       '()
-      (for/list ([i dim])
-        (constraint (list-ref (grids dim) i) all-unique?)
-        ))
-      )
+      (for/list ([i (get-dim puzzle)])
+        (constraint (list-ref (get-grids puzzle) i)
+                    all-unique?))))
 
 
-(define constraints
-  (append row-uniqueness-constraints
-          col-uniqueness-constraints
-          grids-uniqueness-constraints
-          cell-constraints
-          ))
-
-
-(define vars
-  (for/list ([i cells])
-    (var i vals)))
 
 
 
@@ -282,7 +242,7 @@
 ;; UTILITIES
 ;; =====================
 
-(define (print-soln raw-soln)
+(define (print-soln raw-soln dim)
 
   (if (not (list? raw-soln))
       (printf "No solution")
@@ -342,11 +302,39 @@
  ;;   (solve (make-csp vars constraints)))
  ;;  )
 
-(define (solve-puzzle)
+
+;; BKRMK TODO: IMPLEMENT
+;; (define (generate-board dim)
+
+;;   (cond
+;;     [(= dim 4) (void )]
+;;     [(= dim 5) (void )]
+;;     [(= dim 6) (void )]
+;;     [(= dim 9) (void )]
+;;     )
+
+;;   )
+
+
+
+(define (solve-puzzle puzzle)
+  (define constraints
+    (append (row-uniqueness-constraints puzzle)
+            (col-uniqueness-constraints puzzle)
+            (grids-uniqueness-constraints puzzle)
+            (cell-constraints puzzle)
+            ))
+
+  (define vars
+    (for/list ([i (get-cells puzzle)])
+      (var i (get-vals (get-dim (get-cells puzzle))))))
+
+
   (print-soln
-   (solve (make-csp vars constraints)))
-  )
+   (solve (make-csp vars constraints))
+   (get-dim puzzle)
+   ))
 
 
-
-(solve-puzzle)
+;; RUN
+(solve-puzzle easy-5x5-puzzle)
