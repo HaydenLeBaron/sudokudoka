@@ -12,6 +12,8 @@
          "utils.rkt"
          )
 
+(provide solve-puzzle)
+
 
 #| Current solver algorithm used to solve the CSP. Choose between:
 - backtracking-solver (default. Guarenteed to find soln eventually)
@@ -52,13 +54,11 @@ For instance, suppose we have variables representing positive integers a and b a
     (for/list ([i (get-cells puzzle)])
       (var i (get-vals (get-dim (get-cells puzzle))))))
 
+  (raw-soln->soln (solve (make-csp vars constraints)))
+  )
 
-  (print-soln
-   (solve (make-csp vars constraints))
-   (get-dim puzzle)
-   ))
 
 
 ;; RUN
-(solve-puzzle easy-4x4-puzzle)
+(print-soln (solve-puzzle easy-4x4-puzzle) (get-dim easy-4x4-puzzle))
 

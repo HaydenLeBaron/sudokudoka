@@ -3,21 +3,27 @@
 #lang racket
 
 (provide print-soln)
+(provide raw-soln->soln)
 
-(define (print-soln raw-soln dim)
 
-  (if (not (list? raw-soln))
+
+;; BKRMK: TODO: separate printing aspect from soln creation aspect of this function
+
+(define (raw-soln->soln raw-soln)
+  (for/list ([i (length raw-soln)])
+    (cdr (list-ref raw-soln i))))
+
+
+(define (print-soln soln dim)
+
+  (if (not (list? soln))
       (printf "No solution")
-
-      (let ([soln
-             (for/list ([i (length raw-soln)])
-               (cdr (list-ref raw-soln i)))
-             ])
         (for ([i dim])
           (for ([j dim])
             (printf "~a " (list-ref soln (+ (* i dim) j)))
             )
           (printf "\n")
-          )))
-  )
+          ))
 
+  (printf "\n")
+  )
