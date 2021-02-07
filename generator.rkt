@@ -7,6 +7,8 @@
          racket/set
          )
 
+(provide generate-board)
+
 
 (define (gen-rand-filled-boards empty-board num-attempts)
   (set->list (list->set (for/list ([i num-attempts]) (solve-puzzle empty-board)))))
@@ -40,5 +42,5 @@
 
 
 ;; RUN
-(print-soln (generate-board 5) 5)
+;(print-soln (generate-board 4) 4)
 

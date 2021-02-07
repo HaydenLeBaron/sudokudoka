@@ -60,5 +60,6 @@ For instance, suppose we have variables representing positive integers a and b a
 
 
 ;; RUN
-(print-soln (solve-puzzle easy-4x4-puzzle) (get-dim easy-4x4-puzzle))
+;;(print-soln (solve-puzzle easy-4x4-puzzle) (get-dim easy-4x4-puzzle))
+;(print-soln (solve-puzzle empty-5x5-puzzle) (get-dim empty-5x5-puzzle))
 

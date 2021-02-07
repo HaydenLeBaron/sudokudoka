@@ -4,10 +4,16 @@
 
 (provide print-soln)
 (provide raw-soln->soln)
+(provide get-puzzle-from-user)
 
 
 
-;; BKRMK: TODO: separate printing aspect from soln creation aspect of this function
+
+(define (get-puzzle-from-user dim)
+  (map string->number
+       (append*
+        (map string-split (for/list ([i dim])
+                            (read-line (current-input-port) 'any))))))
 
 (define (raw-soln->soln raw-soln)
   (for/list ([i (length raw-soln)])
